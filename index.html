@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URLGuard – Fake URL Detector</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">URLGuard</div>
+    <p class="tagline">Advanced Fake URL & Brand Impersonation Detection</p>
+  </div>
+
+  <!-- ═══ TAB NAVIGATION ═══ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('single')" id="tabSingle">Single URL</button>
+    <button class="tab-btn" onclick="switchTab('bulk')" id="tabBulk">Bulk Scanner</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 1: SINGLE URL                      -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="panelSingle" class="tab-panel active">
+
+    <div class="card">
+      <label class="input-label">Enter Suspicious URL</label>
+      <div class="input-row">
+        <input type="text" id="urlInput" placeholder="e.g. http://g00gle-secure.xyz/login"/>
+        <button id="analyzeBtn" onclick="analyzeURL()">Analyze</button>
+      </div>
+      <div class="sample-urls">
+        <span>Try:</span>
+        <button class="chip" onclick="fillURL('http://paypal.secure-login.xyz/verify')">Fake PayPal</button>
+        <button class="chip" onclick="fillURL('http://g00gle.com/login')">Leet Google</button>
+        <button class="chip" onclick="fillURL('http://arnazon.com/deals')">Fake Amazon</button>
+        <button class="chip" onclick="fillURL('http://faceb00k-login.tk')">Fake Facebook</button>
+        <button class="chip" onclick="fillURL('https://google.com')">Real Google</button>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard" style="display:none">
+      <div class="verdict-header">
+        <div class="verdict-icon" id="verdictIcon"></div>
+        <div>
+          <div class="verdict-text" id="verdictText"></div>
+          <div class="verdict-sub" id="verdictSub"></div>
+        </div>
+        <div class="score-circle" id="scoreCircle">
+          <span id="scoreNum">0</span>
+          <small>/100</small>
+        </div>
+      </div>
+
+      <div id="comparisonSection" style="display:none">
+        <div class="section-title">Domain Similarity Comparison</div>
+        <div id="comparisonCards"></div>
+      </div>
+
+      <div id="attackBanner" style="display:none">
+        <div class="attack-banner">
+          <span id="attackIcon"></span>
+          <div>
+            <div class="attack-title" id="attackTitle"></div>
+            <div class="attack-desc" id="attackDesc"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="flagsSection">
+        <div class="section-title">Threat Breakdown</div>
+        <div id="flagsList"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num" id="statChecks">—</div>
+          <div class="stat-label">Flags Found</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statSimilarity">—</div>
+          <div class="stat-label">Max Similarity</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statBrands">—</div>
+          <div class="stat-label">Brands Checked</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="history-header">
+        <span>Recent Scans</span>
+        <button class="refresh-btn" onclick="loadHistory()">↻ Refresh</button>
+      </div>
+      <div id="historyList"><p class="empty">No scans yet. Analyze a URL above!</p></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 2: BULK CSV SCANNER                -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="panelBulk" class="tab-panel">
+
+    <div class="card">
+      <div class="bulk-top-row">
+        <div>
+          <label class="input-label" style="margin-bottom:0">Paste URLs or Upload CSV</label>
+          <p class="hint-text">One URL per line — max 50 URLs at once</p>
+        </div>
+        <label class="upload-btn" for="csvFileInput">
+          Upload CSV
+          <input type="file" id="csvFileInput" accept=".csv,.txt" onchange="handleCSVUpload(event)" hidden/>
+        </label>
+      </div>
+
+      <textarea id="bulkTextarea" rows="8"
+        placeholder="google.com&#10;paypal-secure-login.xyz&#10;amazon.com&#10;fak3-bank.tk/verify&#10;faceb00k-login.club"></textarea>
+
+      <div id="bulkError" class="error-box" style="display:none"></div>
+
+      <div id="bulkProgress" class="progress-bar-wrap" style="display:none">
+        <div class="progress-bar-fill" id="bulkProgressBar"></div>
+      </div>
+      <p id="bulkProgressText" class="progress-text" style="display:none"></p>
+
+      <button id="bulkScanBtn" class="primary-btn" onclick="startBulkScan()">Scan All URLs</button>
+    </div>
+
+    <!-- Summary -->
+    <div id="bulkSummary" style="display:none">
+      <div class="summary-grid">
+        <div class="summary-card sc-total"><div class="summary-num" id="sumTotal">0</div><div class="summary-label">Total</div></div>
+        <div class="summary-card sc-safe"><div class="summary-num" id="sumSafe">0</div><div class="summary-label">Safe</div></div>
+        <div class="summary-card sc-suspicious"><div class="summary-num" id="sumSuspicious">0</div><div class="summary-label">Suspicious</div></div>
+        <div class="summary-card sc-malicious"><div class="summary-num" id="sumMalicious">0</div><div class="summary-label">Malicious</div></div>
+      </div>
+      <div class="bulk-actions">
+        <button class="action-btn action-export" onclick="exportBulkCSV()">Download CSV Report</button>
+        <button class="action-btn action-clear" onclick="clearBulkResults()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div id="bulkResults" class="card" style="display:none">
+      <div class="section-title">Scan Results</div>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr><th>#</th><th>URL</th><th>Score</th><th>Verdict</th><th>Flags</th></tr></thead>
+          <tbody id="bulkTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

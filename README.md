@@ -129,7 +129,7 @@ If VirusTotal flags 2+ engines:
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint                | Description                |
 |--------|-------------------------|----------------------------|
@@ -142,7 +142,7 @@ If VirusTotal flags 2+ engines:
 
 ---
 
-## 🧪 Test Results
+## Test Results
 
 Tested with 48 URLs (18 legitimate + 30 fake):
 
